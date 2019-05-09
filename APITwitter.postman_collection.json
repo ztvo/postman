@@ -1,0 +1,226 @@
+{
+	"info": {
+		"_postman_id": "d68ee23a-a4ed-4ad4-9eab-a93965575b8e",
+		"name": "APITwitter",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "TwitterSearch",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ed4a5301-74ad-46a5-8f09-91cbe1770a47",
+						"exec": [
+							"pm.test(\"Status code = 200\", function(){",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"pm.test(\"Body includes Postman text\", function(){",
+							"    pm.expect(pm.response.text()).to.include(pm.environment.get(\"search_text\"));",
+							"});",
+							"",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "oauth1",
+					"oauth1": [
+						{
+							"key": "addParamsToHeader",
+							"value": true,
+							"type": "boolean"
+						},
+						{
+							"key": "tokenSecret",
+							"value": "{{AccessTokenSecret}}",
+							"type": "string"
+						},
+						{
+							"key": "token",
+							"value": "{{AccessToken}}",
+							"type": "string"
+						},
+						{
+							"key": "consumerSecret",
+							"value": "{{APISecretKey}}",
+							"type": "string"
+						},
+						{
+							"key": "consumerKey",
+							"value": "{{APIKey}}",
+							"type": "string"
+						},
+						{
+							"key": "signatureMethod",
+							"value": "HMAC-SHA1",
+							"type": "string"
+						},
+						{
+							"key": "version",
+							"value": "1.0",
+							"type": "string"
+						},
+						{
+							"key": "addEmptyParamsToSign",
+							"value": false,
+							"type": "boolean"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://api.twitter.com/1.1/search/tweets.json?q={{search_text}}&count=5",
+					"protocol": "https",
+					"host": [
+						"api",
+						"twitter",
+						"com"
+					],
+					"path": [
+						"1.1",
+						"search",
+						"tweets.json"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "{{search_text}}"
+						},
+						{
+							"key": "count",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TwitterStatusUpdate",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "910f2881-ad71-4d1c-8207-911aaa40009b",
+						"exec": [
+							"value = pm.globals.get(\"tweet_text\") + ' timestamp:' + \"{{timestampHeader}}\";",
+							"console.log(value);",
+							"pm.globals.set(\"tweet_text\", value);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "oauth1",
+					"oauth1": [
+						{
+							"key": "consumerKey",
+							"value": "{{APIKey}}",
+							"type": "string"
+						},
+						{
+							"key": "addParamsToHeader",
+							"value": true,
+							"type": "boolean"
+						},
+						{
+							"key": "tokenSecret",
+							"value": "{{AccessTokenSecret}}",
+							"type": "string"
+						},
+						{
+							"key": "token",
+							"value": "{{AccessToken}}",
+							"type": "string"
+						},
+						{
+							"key": "consumerSecret",
+							"value": "{{APISecretKey}}",
+							"type": "string"
+						},
+						{
+							"key": "signatureMethod",
+							"value": "HMAC-SHA1",
+							"type": "string"
+						},
+						{
+							"key": "version",
+							"value": "1.0",
+							"type": "string"
+						},
+						{
+							"key": "addEmptyParamsToSign",
+							"value": false,
+							"type": "boolean"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://api.twitter.com/1.1/statuses/update.json?status={{tweet_text}}",
+					"protocol": "https",
+					"host": [
+						"api",
+						"twitter",
+						"com"
+					],
+					"path": [
+						"1.1",
+						"statuses",
+						"update.json"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "{{tweet_text}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "97342df0-0fb1-4ffb-9095-f00bffc6260b",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "d6eabd9f-391b-493a-a9bb-4156e81cd7e6",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
