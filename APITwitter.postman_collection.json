@@ -11,19 +11,37 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "ed4a5301-74ad-46a5-8f09-91cbe1770a47",
+						"id": "d1db5208-c4a0-4077-a107-1c42b44b2650",
 						"exec": [
-							"pm.test(\"Status code = 200\", function(){",
-							"    pm.expect(pm.response.code).to.equal(200);",
+							"pm.test(\"API_Tweeter_TweeterSearch_Status code is 200\", () => {",
+							"    pm.response.to.have.status(200);",
 							"});",
-							"",
-							"pm.test(\"Body includes Postman text\", function(){",
+							"pm.test(\"API_Tweeter_TweeterSearch_Response includes #Postman\", () => {",
 							"    pm.expect(pm.response.text()).to.include(pm.environment.get(\"search_text\"));",
 							"});",
 							"",
-							"pm.test(\"Content-Type is present\", function () {",
+							"pm.test(\"API_Tweeter_TweeterSearch_Content-Type is present\", () => {",
 							"    pm.response.to.have.header(\"Content-Type\");",
-							"});"
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "acfdffbd-4685-4528-a6b0-9f4d14c88e45",
+						"exec": [
+							"pm.globals.clear();",
+							"pm.globals.set('loadUtils', function loadUtils() {",
+							"    let utils = {};",
+							"    utils.getTextForTweet = function getTextForTweet() {",
+							"        return  \"Hello world!\";",
+							"    }",
+							"    ",
+							"    return utils;",
+							"} + '; loadUtils();');"
 						],
 						"type": "text/javascript"
 					}
@@ -82,15 +100,11 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "https://api.twitter.com/1.1/search/tweets.json?q={{search_text}}&count=5",
-					"protocol": "https",
+					"raw": "{{url}}/search/tweets.json?q={{search_text}}&count=5",
 					"host": [
-						"api",
-						"twitter",
-						"com"
+						"{{url}}"
 					],
 					"path": [
-						"1.1",
 						"search",
 						"tweets.json"
 					],
@@ -114,12 +128,54 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "910f2881-ad71-4d1c-8207-911aaa40009b",
+						"id": "7769e161-cc3f-478d-be24-970da9b4b595",
 						"exec": [
-							"value = pm.globals.get(\"tweet_text\") + ' timestamp:' + \"{{timestampHeader}}\";",
+							"pm.globals.unset(\"tweet_text\");",
+							"inc = pm.environment.get(\"tweet_inc\");",
+							"inc++;",
+							"pm.environment.set(\"tweet_inc\", inc );",
+							"",
+							"const utils = eval(pm.globals.get('loadUtils'));",
+							"let value = utils.getTextForTweet() + pm.environment.get(\"tweet_inc\");",
 							"console.log(value);",
-							"pm.globals.set(\"tweet_text\", value);",
-							""
+							"pm.globals.set(\"tweet_text\", value);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "91a6830f-e19c-459d-8810-08d73cd5283a",
+						"exec": [
+							"pm.test(\"API_Tweeter_TweeterStatusUpdate_response is ok\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(`API_Tweeter_TweeterStatusUpdate_Response includes ${pm.environment.get(\"tweet_inc\")}`, () => {\r",
+							"    pm.expect(pm.response.text()).to.include(pm.environment.get(\"tweet_inc\"));\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							"var userData = { \"id\": 484513391,\r",
+							"        \"id_str\": \"484513391\",\r",
+							"        \"name\": \"Сидоркина Татьяна\",\r",
+							"        \"screen_name\": \"fenix_tvo\"\r",
+							"    };\r",
+							"    \r",
+							"var strUserData = JSON.stringify(userData);\r",
+							"var strActualUserData = JSON.stringify(jsonData.user);\r",
+							"\r",
+							"pm.test(`API_Tweeter_TweeterStatusUpdate_Check a tweet data actual ${strActualUserData} `, () => {\r",
+							"    pm.expect(jsonData.text).to.be.a('string');\r",
+							"    pm.expect(jsonData.user.id).to.be.a('number');\r",
+							"    pm.expect(jsonData.user.id_str).to.be.a('string');\r",
+							"    pm.expect(jsonData.user.name).to.be.a('string');\r",
+							"    pm.expect(jsonData.user.screen_name).to.be.a('string');\r",
+							"    pm.expect(jsonData.text).to.equal(pm.globals.get(\"tweet_text\"));\r",
+							"    pm.expect(jsonData.user.screen_name).to.equal('fenix_tvo');\r",
+							"    pm.expect(jsonData).to.have.deep.nested.property(\"user.name\", userData.name);\r",
+							"});"
 						],
 						"type": "text/javascript"
 					}
@@ -178,15 +234,11 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "https://api.twitter.com/1.1/statuses/update.json?status={{tweet_text}}",
-					"protocol": "https",
+					"raw": "{{url}}/statuses/update.json?status={{tweet_text}}",
 					"host": [
-						"api",
-						"twitter",
-						"com"
+						"{{url}}"
 					],
 					"path": [
-						"1.1",
 						"statuses",
 						"update.json"
 					],
